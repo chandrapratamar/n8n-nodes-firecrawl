@@ -67,6 +67,12 @@ To use the Firecrawl node, you need to:
 
 ## Version history
 
+### 1.0.5
+- API version updated to [/v2](https://docs.firecrawl.dev/migrate-to-v2)
+- Unified sitemap configuration parameters in Map operation
+- Replaced `ignoreSitemap` and `sitemapOnly` with unified `sitemap` parameter
+- `sitemap` parameter now accepts: "include" (default), "only", or "skip"
+
 ### 1.0.4
 - Add additional fields property for custom data in Firecrawl API nodes
 
