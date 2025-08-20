@@ -11,43 +11,34 @@ export const name = 'map';
 export const displayName = 'Map a website and get urls';
 export const operationName = 'map';
 
-function createIgnoreSitemapProperty(): INodeProperties {
+function createSitemapProperty(): INodeProperties {
 	return {
-		displayName: 'Ignore Sitemap',
-		name: 'ignoreSitemap',
-		type: 'boolean',
-		default: true,
-		description: 'Whether to ignore the website sitemap when crawling',
+		displayName: 'Sitemap',
+		name: 'sitemap',
+		type: 'options',
+		options: [
+			{
+				name: 'Include',
+				value: 'include',
+				description: 'Include sitemap when crawling (default)',
+			},
+			{
+				name: 'Only',
+				value: 'only',
+				description: 'Only return links found in the website sitemap',
+			},
+			{
+				name: 'Skip',
+				value: 'skip',
+				description: 'Ignore the website sitemap when crawling',
+			},
+		],
+		default: 'include',
+		description: 'How to handle the website sitemap during crawling',
 		routing: {
 			request: {
 				body: {
-					ignoreSitemap: '={{ $value }}',
-				},
-			},
-		},
-		displayOptions: {
-			hide: {
-				useCustomBody: [true],
-			},
-			show: {
-				resource: ['Default'],
-				operation: [operationName],
-			},
-		},
-	};
-}
-
-function createSitemapOnlyProperty(): INodeProperties {
-	return {
-		displayName: 'Sitemap Only',
-		name: 'sitemapOnly',
-		type: 'boolean',
-		default: false,
-		description: 'Whether to only return links found in the website sitemap',
-		routing: {
-			request: {
-				body: {
-					sitemapOnly: '={{ $value }}',
+					sitemap: '={{ $value }}',
 				},
 			},
 		},
@@ -225,9 +216,7 @@ function createMapProperties(): INodeProperties[] {
 
 		createUrlProperty(name),
 
-		createIgnoreSitemapProperty(),
-
-		createSitemapOnlyProperty(),
+		createSitemapProperty(),
 
 		createIncludeSubdomainsProperty(),
 
