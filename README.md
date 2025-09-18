@@ -33,6 +33,27 @@ The **Firecrawl** node supports the following operations:
 ### Crawl
 - Scrapes all the URLs of a web page and return content in LLM-ready format
 
+### Batch Scrape
+- Start a batch job to scrape multiple URLs at once
+
+### Batch Scrape Status
+- Get the status/result of a batch scrape job by ID
+
+### Batch Scrape Errors
+- Retrieve errors for a batch scrape job by ID
+
+### Crawl Active
+- List all currently active crawl jobs for your team
+
+### Crawl Params Preview
+- Preview crawl parameters generated from a natural-language prompt
+
+### Cancel Crawl
+- Cancel a running crawl job by ID
+
+### Get Crawl Errors
+- Retrieve errors for a crawl job by ID
+
 ### Get Crawl Status
 - Check the current status of a crawl job
 
@@ -41,6 +62,21 @@ The **Firecrawl** node supports the following operations:
 
 ### Get Extract Status
 - Get the current status of an extraction job
+
+### Team Token Usage
+- Get remaining and plan tokens for the authenticated team
+
+### Team Credit Usage
+- Get remaining and plan credits for the authenticated team
+
+### Historical Credit Usage
+- Get historical credit usage for your team
+
+### Historical Token Usage
+- Get historical token usage for your team
+
+### Team Queue Status
+- Get your team’s current queue load (waiting, active, max concurrency)
 
 ## Credentials
 
@@ -66,6 +102,20 @@ To use the Firecrawl node, you need to:
 * [Firecrawl API Reference](https://docs.firecrawl.dev/api-reference/introduction)
 
 ## Version history
+
+### 1.0.6
+- Add support for additional Firecrawl endpoints:
+  - Batch Scrape (start/status/errors)
+  - Crawl Active
+  - Crawl Params Preview
+  - Cancel Crawl 
+  - Get Crawl Errors
+  - Team Token Usage
+  - Team Credit Usage
+  - Historical Credit Usage
+  - Historical Token Usage
+  - Team Queue Status
+- Wire new operations into the node and align with Firecrawl API v2
 
 ### 1.0.5
 - API version updated to [/v2](https://docs.firecrawl.dev/migrate-to-v2)
