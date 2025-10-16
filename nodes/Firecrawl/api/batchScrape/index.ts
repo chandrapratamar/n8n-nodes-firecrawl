@@ -1,128 +1,169 @@
-import { INodeProperties } from 'n8n-workflow';
-import { buildApiProperties, createOperationNotice } from '../common';
+import {
+	IDataObject,
+	IExecuteSingleFunctions,
+	IHttpRequestOptions,
+	INodeProperties,
+} from 'n8n-workflow';
+import {
+	buildApiProperties,
+	createBatchUrlsProperty,
+	createOperationNotice,
+	createScrapeOptionsProperty,
+} from '../common';
 
+// Define the operation name and display name
 export const name = 'batchScrape';
 export const displayName = 'Batch scrape multiple URLs';
+export const operationName = 'batchScrape';
 
-function createUrlsProperty(): INodeProperties {
+/**
+ * Creates the parsers property
+ * @param operationName - The name of the operation
+ * @returns The parsers property
+ */
+function createParsersProperty(operationName: string): INodeProperties {
 	return {
-		displayName: 'URLs',
-		name: 'urls',
-		type: 'fixedCollection',
-		default: {},
-		description: 'List of URLs to scrape',
-		options: [
-			{
-				displayName: 'URLs',
-				name: 'list',
-				values: [
-					{
-						displayName: 'URL',
-						name: 'url',
-						type: 'string',
-						default: '',
-					},
-				],
-				typeOptions: {
-					multipleValues: true,
-				},
-			},
-		],
-		routing: {
-			request: {
-				body: {
-					urls: '={{$value.list ? $value.list.map(i => i.url) : []}}',
-				},
-			},
-		},
-		displayOptions: {
-			show: {
-				resource: ['Default'],
-				operation: [name],
-			},
-		},
-	};
-}
-
-function createFormatsProperty(): INodeProperties {
-	return {
-		displayName: 'Formats',
-		name: 'formats',
+		displayName: 'Parsers',
+		name: 'parsers',
 		type: 'multiOptions',
 		options: [
-			{ name: 'Markdown', value: 'markdown' },
-			{ name: 'HTML', value: 'html' },
-			{ name: 'Raw HTML', value: 'rawHtml' },
-			{ name: 'Links', value: 'links' },
-			{ name: 'Screenshot', value: 'screenshot' },
-			{ name: 'Summary', value: 'summary' },
-			{ name: 'JSON', value: 'json' },
+			{
+				name: 'PDF',
+				value: 'pdf',
+			},
 		],
-		default: ['markdown'],
-		description: 'Output format(s) for the scraped data',
+		default: [],
+		description:
+			'Controls how PDF files are processed during scraping. When PDF parser is enabled, the PDF content is extracted and converted to markdown format, with billing based on the number of pages (1 credit per page). When disabled, the PDF file is returned in base64 encoding with a flat rate of 1 credit total.',
 		routing: {
 			request: {
 				body: {
-					formats: '={{ $value }}',
+					parsers: '={{ $value }}',
 				},
 			},
 		},
 		displayOptions: {
-			show: {
-				resource: ['Default'],
-				operation: [name],
-			},
 			hide: {
 				useCustomBody: [true],
+			},
+			show: {
+				resource: ['Default'],
+				operation: [operationName],
 			},
 		},
 	};
 }
 
-function createIgnoreInvalidUrlsProperty(): INodeProperties {
+/**
+ * Create additional fields property for custom data
+ */
+function createAdditionalFieldsProperty(operation: string): INodeProperties {
 	return {
-		displayName: 'Ignore Invalid URLs',
-		name: 'ignoreInvalidURLs',
-		type: 'boolean',
-		default: true,
-		description: 'Skip invalid URLs instead of failing the entire batch',
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		description: 'Additional fields to send in the request body',
+		options: [
+			{
+				displayName: 'Custom Properties (JSON)',
+				name: 'customProperties',
+				type: 'json',
+				default: '{}',
+				description: 'Custom JSON properties to add to the request body',
+			},
+		],
 		routing: {
 			request: {
 				body: {
-					ignoreInvalidURLs: '={{ $value }}',
+					additionalFields: '={{ $value }}',
 				},
+			},
+			send: {
+				preSend: [
+					async function (
+						this: IExecuteSingleFunctions,
+						requestOptions: IHttpRequestOptions,
+					): Promise<IHttpRequestOptions> {
+						if (typeof requestOptions.body !== 'object' || !requestOptions.body) {
+							return requestOptions;
+						}
+
+						const body = requestOptions.body as IDataObject;
+						const additionalFields = body.additionalFields as IDataObject;
+
+						if (additionalFields) {
+							// Handle custom properties JSON
+							if (additionalFields.customProperties) {
+								try {
+									const customProps = JSON.parse(additionalFields.customProperties as string);
+									Object.assign(requestOptions.body as IDataObject, customProps);
+								} catch (error) {
+									// If JSON parsing fails, just skip
+								}
+							}
+
+							// Remove the additionalFields wrapper
+							delete body.additionalFields;
+						}
+
+						return requestOptions;
+					},
+				],
 			},
 		},
 		displayOptions: {
 			show: {
-				resource: ['Default'],
-				operation: [name],
-			},
-			hide: {
+				operation: [operation],
 				useCustomBody: [true],
 			},
 		},
 	};
 }
 
-function createBatchScrapeProperties(): INodeProperties[] {
+/**
+ * Create the properties for the scrape operation
+ */
+function createScrapeProperties(): INodeProperties[] {
 	return [
-		createOperationNotice('Default', name),
-		createUrlsProperty(),
-		createFormatsProperty(),
-		createIgnoreInvalidUrlsProperty(),
+		// Operation notice
+		createOperationNotice('Default', name, 'POST'),
+
+		// URL input
+		createBatchUrlsProperty(name, 'https://firecrawl.dev'),
+
+		// Parsers
+		createParsersProperty(operationName),
+
+		// Scrape options with batch-specific properties
+		createScrapeOptionsProperty(operationName, false, true),
 	];
 }
 
-const { options, properties } = buildApiProperties(name, displayName, createBatchScrapeProperties());
+// Build and export the properties and options
+const { options, properties } = buildApiProperties(name, displayName, createScrapeProperties());
 
-// Override request path to hit /batch/scrape
+// Override the URL for batch operations
 options.routing = {
+	...options.routing,
 	request: {
-		url: '=\/batch\/scrape',
+		...(options.routing?.request || {}),
+		url: '/batch/scrape',
+	},
+	output: {
+		postReceive: [
+			{
+				type: 'setKeyValue',
+				properties: {
+					data: '={{$response.body}}',
+				},
+			},
+		],
 	},
 };
 
+// Add the additional fields property separately so it appears only when custom body is enabled
+properties.push(createAdditionalFieldsProperty(name));
+
 export { options, properties };
-
-

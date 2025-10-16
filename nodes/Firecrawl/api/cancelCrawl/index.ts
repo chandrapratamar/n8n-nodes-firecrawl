@@ -27,10 +27,7 @@ function createCrawlIdProperty(): INodeProperties {
 }
 
 function createProperties(): INodeProperties[] {
-	return [
-		createOperationNotice('Default', name, 'DELETE'),
-		createCrawlIdProperty(),
-	];
+	return [createOperationNotice('Default', name, 'DELETE'), createCrawlIdProperty()];
 }
 
 const { options, properties } = buildApiProperties(name, displayName, createProperties());
@@ -42,5 +39,3 @@ options.routing = {
 };
 
 export { options, properties };
-
-

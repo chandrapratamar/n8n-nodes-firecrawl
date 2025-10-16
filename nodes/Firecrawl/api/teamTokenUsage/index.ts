@@ -13,10 +13,8 @@ const { options, properties } = buildApiProperties(name, displayName, createProp
 options.routing = {
 	request: {
 		method: 'GET',
-		url: '=\/team\/token-usage',
+		url: '=/team/token-usage',
 	},
 };
 
 export { options, properties };
-
-

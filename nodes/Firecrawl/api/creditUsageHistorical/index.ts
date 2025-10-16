@@ -13,10 +13,8 @@ const { options, properties } = buildApiProperties(name, displayName, createProp
 options.routing = {
 	request: {
 		method: 'GET',
-		url: '=\/team\/credit-usage\/historical',
+		url: '=/team/credit-usage/historical',
 	},
 };
 
 export { options, properties };
-
-

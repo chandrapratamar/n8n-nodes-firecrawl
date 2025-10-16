@@ -29,21 +29,15 @@ function createPromptProperty(): INodeProperties {
 }
 
 function createProperties(): INodeProperties[] {
-	return [
-		createOperationNotice('Default', name),
-		createUrlProperty(name),
-		createPromptProperty(),
-	];
+	return [createOperationNotice('Default', name), createUrlProperty(name), createPromptProperty()];
 }
 
 const { options, properties } = buildApiProperties(name, displayName, createProperties());
 
 options.routing = {
 	request: {
-		url: '=\/crawl\/params-preview',
+		url: '=/crawl/params-preview',
 	},
 };
 
 export { options, properties };
-
-

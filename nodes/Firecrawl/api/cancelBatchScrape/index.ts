@@ -27,10 +27,7 @@ function createBatchIdProperty(): INodeProperties {
 }
 
 function createProperties(): INodeProperties[] {
-	return [
-		createOperationNotice('Default', name, 'DELETE'),
-		createBatchIdProperty(),
-	];
+	return [createOperationNotice('Default', name, 'DELETE'), createBatchIdProperty()];
 }
 
 const { options, properties } = buildApiProperties(name, displayName, createProperties());
@@ -42,5 +39,3 @@ options.routing = {
 };
 
 export { options, properties };
-
-
